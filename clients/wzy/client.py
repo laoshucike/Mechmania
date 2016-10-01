@@ -56,16 +56,35 @@ def archer_func(myself, enemy, enemys, ally):
 
     if myself.attributes.health > myself.attributes.maxHealth * 0.5:  # higher than 0.5 * maxhealth , fight!!!!!
         target = None
-        if myself.in_range_of(enemy, gameMap):
+        if myself.in_range_of(enemy, gameMap):  #fight or cast
                 target = enemy
         if target != None:
-            return {
-                "Action": "Attack",
-                "CharacterId": myself.id,
-                "TargetId": target.id,
-            }
+            if myself.casting is None:              #cast
+                cast = False
+                for abilityId, cooldown in myself.abilities.items():
+                    # Do I have an ability not on cooldown
+                    if cooldown == 0 and int(abilityId) == 12:
+                        # If I can, then cast it
+                        ability = game_consts.abilitiesList[int(abilityId)]
+                        # Get ability
+                        return {
+                            "Action": "Cast",
+                            "CharacterId": myself.id,
+                            # Am I buffing or debuffing? If buffing, target myself
+                            "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
+                            "AbilityId": int(abilityId)
+                        }
+                        cast = True
+                        break
 
-        else:
+                if not cast:                  # Was I able to cast something? Either wise attack
+                    return {
+                        "Action": "Attack",
+                        "CharacterId": myself.id,
+                        "TargetId": target.id,
+                    }
+
+        else:       #move to enemy
             return{
                 "Action": "Move",
                 "CharacterId": myself.id,
@@ -98,19 +117,69 @@ def archer_func(myself, enemy, enemys, ally):
                 }
         else:                                #run!!!!!!!!!!!
 
-            if (ally[0].classId in naima):      #run to naima
-                return {
-                    "Action": "Move",
-                    "CharacterId": myself.id,
-                    "TargetId": ally[0].id,
-                }
+            if (ally[0].classId in naima):          #run to naima
+                if ally[0].position == myself.position:     #fight with naima
+                    if myself.in_range_of(enemy, gameMap):
+                        return {
+                            "Action": "Attack",
+                            "CharacterId": myself.id,
+                            "TargetId": target.id,
+                        }
+                    else:                               #stay
+                        return {
+                            "Action": "Move",
+                            "CharacterId": myself.id,
+                            "TargetId": ally[0].id,
+                        }
+                else:                                   #move to naima
+                    return {
+                        "Action": "Move",
+                        "CharacterId": myself.id,
+                        "TargetId": ally[0].id,
+                    }
 
             if (ally[1].classId in naima):          #run to naima
-                return {
-                    "Action": "Move",
-                    "CharacterId": myself.id,
-                    "TargetId": ally[0].id,
-                }                
+                if ally[1].position == myself.position:     #fight with naima
+                    if myself.in_range_of(enemy, gameMap):
+                        return {
+                        "Action": "Attack",
+                        "CharacterId": myself.id,
+                        "TargetId": target.id,
+                        }
+                    else:                               #stay
+                        return {
+                            "Action": "Move",
+                            "CharacterId": myself.id,
+                            "TargetId": ally[1].id,
+                        }
+                else:                                   #move to naima
+                    return {
+                        "Action": "Move",
+                        "CharacterId": myself.id,
+                        "TargetId": ally[1].id,
+                    }
+
+            if (ally[2].classId in naima):          #run to naima
+                if ally[2].position == myself.position:     #fight with naima
+                    if myself.in_range_of(enemy, gameMap):
+                        return {
+                            "Action": "Attack",
+                            "CharacterId": myself.id,
+                            "TargetId": target.id,
+                        }
+                    else:                               #stay
+                        return {
+                            "Action": "Move",
+                            "CharacterId": myself.id,
+                            "TargetId": ally[2].id,
+                        }
+                else:                                   #move to naima
+                    return {
+                        "Action": "Move",
+                        "CharacterId": myself.id,
+                        "TargetId": ally[2].id,
+                    }
+            
 
             nextplace = copy.deepcopy(myself.position)  #no naima
 

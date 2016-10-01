@@ -15,7 +15,7 @@ from src.game.gamemap import *
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "Test"
+teamName = "Default"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
@@ -24,11 +24,11 @@ def initialResponse():
     return {'TeamName': teamName,
             'Characters': [
                 {"CharacterName": "Druid",
-                 "ClassId": "Druid"},
-                {"CharacterName": "Archer",
-                 "ClassId": "Archer"},
-                {"CharacterName": "Warrior",
                  "ClassId": "Warrior"},
+                {"CharacterName": "Archer",
+                 "ClassId": "Druid"},
+                {"CharacterName": "Warrior",
+                 "ClassId": "Archer"},
             ]}
 # ---------------------------------------------------------------------
 
