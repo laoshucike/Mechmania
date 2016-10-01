@@ -28,7 +28,7 @@ def initialResponse():
                 {"CharacterName": "Archer",
                  "ClassId": "Druid"},
                 {"CharacterName": "Warrior",
-                 "ClassId": "Archer"},
+                 "ClassId": "Enchanter"},
             ]}
 # ---------------------------------------------------------------------
 

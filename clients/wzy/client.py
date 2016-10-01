@@ -63,7 +63,7 @@ def archer_func(myself, enemy, enemys, ally):
                 cast = False
                 for abilityId, cooldown in myself.abilities.items():
                     # Do I have an ability not on cooldown
-                    if cooldown == 0 and int(abilityId) == 12:
+                    if cooldown == 0 and int(abilityId) == 2:
                         # If I can, then cast it
                         ability = game_consts.abilitiesList[int(abilityId)]
                         # Get ability
@@ -107,16 +107,16 @@ def archer_func(myself, enemy, enemys, ally):
                     "CharacterId": myself.id,
                     "TargetId": ally[0].id,
                 }
-        elif myself.abilities[2] == 0:
+        elif myself.abilities[12] == 0:
                 return {
                     "Action": "Cast",
                     "CharacterId": myself.id,
 
                     "TargetId": myself.id,
-                    "AbilityId": int(2)
+                    "AbilityId": int(12)
                 }
         else:                                #run!!!!!!!!!!!
-
+            '''
             if (ally[0].classId in naima):          #run to naima
                 if ally[0].position == myself.position:     #fight with naima
                     if myself.in_range_of(enemy, gameMap):
@@ -180,7 +180,7 @@ def archer_func(myself, enemy, enemys, ally):
                         "TargetId": ally[2].id,
                     }
             
-
+            '''
             nextplace = copy.deepcopy(myself.position)  #no naima
 
             nextplace_arr = list(nextplace)
