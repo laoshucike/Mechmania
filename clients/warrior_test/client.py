@@ -27,48 +27,55 @@ myself -- character obj
 
 '''
 
+
 def warrier_function(myself, enemylist):
     action = None
-    for enemy in enemylist:
-        if enemy.is_dead():
+    lowestHP = 2000
+    enemy = None
+    for target in enemylist:
+        if target.is_dead():
             continue
-        if myself.in_range_of(enemy, gameMap):
-            if myself.casting is None:
-                cast = False
-                for abilityId, cooldown in myself.abilities.items():
-                    if cooldown == 0 and abilityId == 1:
-                        ability = game_consts.abilitiesList[int(abilityId)]
-                        action = {
-                            "Action" : "Cast",
-                            "CharacterId":myself.id,
-                            "TargetId":enemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
-                            "AbilityId":1                            
-                        }
-                        cast = True
-                        break
-                    if hurt[int(myself.id -1)] == True and cooldown == 0 and abilityId == 15:
-                        ability = game_consts.abilitiesList[int(abilityId)]
-
-                        action = {
-                                   "Action" : "Cast",
-                                   "CharacterId":myself.id,
-                                   "TargetId":enemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
-                                   "AbilityId":15                            
-                               }
-                        cast = True
-                        break
-                if not cast:
+        if HP[int(target.id) - 1] < lowestHP:
+            lowestHP = HP[int(target.id) - 1]
+            enemy = target
+    
+    if myself.in_range_of(enemy, gameMap):
+        if myself.casting is None:
+            cast = False
+            for abilityId, cooldown in myself.abilities.items():
+                if cooldown == 0 and abilityId == 1:
+                    ability = game_consts.abilitiesList[int(abilityId)]
                     action = {
-                        "Action": "Attack",
-                        "CharacterId": myself.id,
-                        "TargetId": enemy.id,
+                        "Action" : "Cast",
+                        "CharacterId":myself.id,
+                        "TargetId":enemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
+                        "AbilityId":1                            
                     }
-        else: # Not in range, move towards
-            action = {
-                "Action": "Move",
-                "CharacterId": myself.id,
-                "TargetId": enemy.id,
-            }
+                    cast = True
+                    break
+                if hurt[int(myself.id -1)] == True and cooldown == 0 and abilityId == 15:
+                    ability = game_consts.abilitiesList[int(abilityId)]
+
+                    action = {
+                               "Action" : "Cast",
+                               "CharacterId":myself.id,
+                               "TargetId":enemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
+                               "AbilityId":15                            
+                           }
+                    cast = True
+                    break
+            if not cast:
+                action = {
+                    "Action": "Attack",
+                    "CharacterId": myself.id,
+                    "TargetId": enemy.id,
+                }
+    else: # Not in range, move towards
+        action = {
+            "Action": "Move",
+            "CharacterId": myself.id,
+            "TargetId": enemy.id,
+        }
     return action
 
 
