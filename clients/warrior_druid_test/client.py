@@ -19,6 +19,8 @@ HP = [0,0,0,0,0,0]
 speed = [0,0,0,0,0,0]
 turn = 0
 hurt = [False, False, False, False,False,False]
+stunned = [False, False, False, False, False, False]
+stun_flag = False
 # Game map that you can use to query 
 gameMap = GameMap()
 
@@ -216,6 +218,7 @@ def warrier_function(myself, enemylist):
     action = None
     lowestHP = 2000
     enemy = None
+    global stun_flag
     for target in enemylist:
         if target.is_dead() or not myself.in_range_of(target, gameMap):
             continue
@@ -227,8 +230,10 @@ def warrier_function(myself, enemylist):
         if myself.casting is None:
             cast = False
             for abilityId, cooldown in myself.abilities.items():
-                if cooldown == 0 and abilityId == 1:
+                if cooldown == 0 and abilityId == 1 and stunned[int(enemy.id) - 1] == False and stun_flag == False:
+                    stun_flag = True
                     ability = game_consts.abilitiesList[int(abilityId)]
+                    print "FUCCCCCKING STUNNNN"
                     action = {
                         "Action" : "Cast",
                         "CharacterId":myself.id,
@@ -270,12 +275,12 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "D1",
-                 "ClassId": "Druid"},
-                {"CharacterName": "D2",
-                 "ClassId": "Druid"},
-                {"CharacterName": "D3",
-                 "ClassId": "Druid"},
+                {"CharacterName": "W1",
+                 "ClassId": "Warrior"},
+                {"CharacterName": "W2",
+                 "ClassId": "Warrior"},
+                {"CharacterName": "W3",
+                 "ClassId": "Warrior"},
             ]}
 # ---------------------------------------------------------------------
 
@@ -287,7 +292,9 @@ def processTurn(serverResponse):
     myteam = []
     enemyteam = []
     global turn 
+    global stun_flag
     turn  += 1
+    stun_flag = False
     print "T",turn
     # Find each team and serialize the objects
     for team in serverResponse["Teams"]:
@@ -307,6 +314,7 @@ def processTurn(serverResponse):
                 full_HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MaxHealth"])
                 speed[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MovementSpeed"])
                 positions[int(team["Characters"][i]["Id"]) - 1] = team["Characters"][i]["Position"]
+                stunned[int(team["Characters"][i]["Id"]) - 1] = (int(team["Characters"][i]["Attributes"]["Stunned"]) == -1)                
 
                 i+=1
 
