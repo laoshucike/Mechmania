@@ -20,7 +20,7 @@ targetpriority = ["Sorcerer", "Enchanter", "Wizard", "Assassin", "Druid", "Arche
 naima = ["Paladin", "Druid"]
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "Wzy"
+teamName = "wzy"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
@@ -117,7 +117,7 @@ def archer_func(myself, enemy, enemys, ally):
             nextplace_arr = list(nextplace)
 
             speed = myself.attributes.movementSpeed
-            if speed == 1:
+            if speed == 1:                                      #speed 1
 
                 if averX < nextplace_arr[0] and averY < nextplace_arr[1]:
                     if nextplace_arr[0] == 4 and nextplace_arr[1] == 4:
@@ -208,7 +208,8 @@ def archer_func(myself, enemy, enemys, ally):
                         if ((nextplace_arr[0] == 3 and nextplace_arr[1] == 1) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 3 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 1)):
                             nextplace_arr[0] += 1
                             nextplace_arr[1] = nextplace_arr[1] - 1
-            else:
+
+            else:                       #speed 2
                 if averX < myself.position[0]:
                     if myself.position[0] == 3:
                         nextplace_arr[0] += 1
