@@ -15,20 +15,20 @@ from src.game.gamemap import *
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "Test"
+teamName = "hahaha"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
-    return {'TeamName': 'reference',
+    return {'TeamName': '3Ass',
             'Characters': [
-                {"CharacterName": "Archer1",
-                 "ClassId": "Archer"},
-                {"CharacterName": "Archer2",
-                 "ClassId": "Archer"},
-                {"CharacterName": "Archer3",
-                 "ClassId": "Archer"},
+                {"CharacterName": "1",
+                 "ClassId": "Warrior"},
+                {"CharacterName": "2",
+                 "ClassId": "Warrior"},
+                {"CharacterName": "3",
+                 "ClassId": "Warrior"},
             ]}
 # ---------------------------------------------------------------------
 
@@ -56,10 +56,10 @@ def processTurn(serverResponse):
     # Choose a target
     target = None
     for character in enemyteam:
-        if not character.is_dead():
+        if not character.is_dead():		
             target = character
             break
-
+    
     # If we found a target
     if target:
         for character in myteam:

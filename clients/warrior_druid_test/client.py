@@ -13,6 +13,7 @@ from src.game.gamemap import *
 
 targetpriority = ["Sorcerer", "Enchanter", "Wizard", "Assassin", "Druid", "Archer", "Paladin", "Warrior"]
 naima = ["Paladin", "Druid"]
+positions = [[],[],[],[],[],[]]
 full_HP = [0,0,0,0,0,0]
 HP = [0,0,0,0,0,0]
 speed = [0,0,0,0,0,0]
@@ -21,13 +22,37 @@ hurt = [False, False, False, False,False,False]
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "yongshi"
+teamName = "yongshi_deluyi"
 # ---------------------------------------------------------------------
 
 '''
 myself -- character obj
 
 '''
+def isValidPosition(pos):
+    for i in pos:
+        if i < 0 or i > 4:
+            return False
+    if pos == [1,1] or pos == [1,3] or pos == [3,1] or pos == [3,3]:
+        return False
+    return True
+
+def fleeNextStep(myPos,enemyPos):
+    nextList = []
+    nextList.append([myPos[0], myPos[1] + 1])
+    nextList.append([myPos[0] + 1, myPos[1]])
+    nextList.append([myPos[0] - 1, myPos[1]])
+    nextList.append([myPos[0], myPos[1] - 1])
+    mostDistance = 0
+    farestPos = []
+    for newPos in nextList:
+        if isValidPosition(newPos):
+            currDistance = abs(newPos[0] - enemyPos[0]) + abs(newPos[1] - enemyPos[1]) 
+            if currDistance > mostDistance:
+                mostDistance = currDistance
+                farestPos = newPos
+    return farestPos
+    
 def druid_function(myself, enemylist, allylist):
     action = None
     lowestHP_e = 2000
@@ -55,7 +80,7 @@ def druid_function(myself, enemylist, allylist):
                 for abilityId, cooldown in myself.abilities.items():
                     if cooldown == 0 and abilityId == 3:
                         ability = game_consts.abilitiesList[int(abilityId)]
-                        action = {
+                        return {
                             "Action" : "Cast",
                             "CharacterId":myself.id,
                             "TargetId":ally.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
@@ -66,7 +91,7 @@ def druid_function(myself, enemylist, allylist):
 
                     if cooldown == 0 and abilityId == 4:
                         ability = game_consts.abilitiesList[int(abilityId)]
-                        action = {
+                        return {
                                 "Action" : "Cast",
                                 "CharacterId":myself.id,
                                 "TargetId": ally.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
@@ -83,7 +108,7 @@ def druid_function(myself, enemylist, allylist):
                 ally = target
         if ally != None:
             if HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 500):
-                action = {
+                return {
                     "Action" : "Cast",
                     "CharacterId":myself.id,
                     "TargetId":ally.id 
@@ -91,14 +116,13 @@ def druid_function(myself, enemylist, allylist):
             else:
                 if enemy == None:
                     if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
-                        action = {
+                        return  {
                                 "Action" : "Move",
                                 "CharacterId" : myself.id,
                                 "TargerId" : enemy.id
                                 }
                     else:
-                        # flee ??
-                        pass
+                        return None
                         
                 else:
                     moving = False
@@ -110,7 +134,7 @@ def druid_function(myself, enemylist, allylist):
                                 for abilityId, cooldown in myself.abilities.items():
                                     if cooldown == 0 and abilityId == 13:
                                         ability = game_consts.abilitiesList[int(abilityId)]
-                                        action = {
+                                        return {
                                             "Action" : "Cast",
                                             "CharacterId":myself.id,
                                             "TargetId":movingEnemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
@@ -120,28 +144,37 @@ def druid_function(myself, enemylist, allylist):
                                         break
                                 if not cast:
                                     if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
-                                        action = {
+                                        return {
                                                 "Action" : "Attack",
                                                 "CharacterId" : myself.id,
                                                 "TargerId" : enemy.id
                                                 }
                                     else:
-                                        # flee ??
-
+                                        pos_enemy = positions[int(movingEnemy.Id) - 1]
+                                        return {
+                                                "Action" : "Move",
+                                                "CharacterId": myself.id,
+                                                "Location":fleeNextStep(myself.position, pos_enemy)
+                                                }
                             break
-
                     if moving == False:
                         if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
-                            action = {
+                            return {
                                     "Action" : "Attack",
                                     "CharacterId" : myself.id,
                                     "TargerId" : enemy.id
                                     }
                         else:
                             # flee ??       
+                            pos_enemy = positions[int(enemy.Id) - 1]
+                            return {
+                                    "Action" : "Move",
+                                    "CharacterId": myself.id,
+                                    "Location":fleeNextStep(myself.position, pos_enemy)
+                                    }
 
     
-    return action 
+    return None 
 
 def warrier_function(myself, enemylist):
     action = None
@@ -199,14 +232,14 @@ def warrier_function(myself, enemylist):
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
-    return {'TeamName': 'warrior_test',
+    return {'TeamName': 'warrior_druid_test',
             'Characters': [
                 {"CharacterName": "W1",
                  "ClassId": "Warrior"},
                 {"CharacterName": "W2",
                  "ClassId": "Warrior"},
-                {"CharacterName": "W3",
-                 "ClassId": "Warrior"},
+                {"CharacterName": "D3",
+                 "ClassId": "Druid"},
             ]}
 # ---------------------------------------------------------------------
 
@@ -232,6 +265,10 @@ def processTurn(serverResponse):
                     hurt[int(team["Characters"][i]["Id"] - 1)] = False
                 HP[int(team["Characters"][i]["Id"]) -1] = int(team["Characters"][i]["Attributes"]["Health"])
 
+                full_HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MaxHealth"])
+                speed[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MovementSpeed"])
+                positions[int(team["Characters"][i]["Id"]) - 1] = team["Characters"][i]["Position"]
+
                 i+=1
 
         else:
@@ -245,10 +282,11 @@ def processTurn(serverResponse):
                     hurt[int(team["Characters"][i]["Id"])-1] = False
                 HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["Health"])
 
-                i+=1
-            full_HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MaxHealth"])
-            speed[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MovementSpeed"])
+                full_HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MaxHealth"])
+                speed[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MovementSpeed"])
+                positions[int(team["Characters"][i]["Id"]) - 1] = team["Characters"][i]["Position"]
 
+                i+=1
 # ------------------ You shouldn't change above but you can ---------------
 
     # Choose a target
@@ -266,6 +304,15 @@ def processTurn(serverResponse):
                 action = warrier_function(character, enemyteam)
                 if not action == None:
                     actions.append(action)
+            
+            if character.classId == 'Druid':
+                action = druid_function(character, enemyteam, [x for x in myteam if x != character])
+                if not action == None:
+                    actions.append(action)
+            
+            #print character
+
+            #print [x for x in myteam if x!=character]
             # If I am in range, either move towards target
             if character.in_range_of(target, gameMap):
                 # Am I already trying to cast something?

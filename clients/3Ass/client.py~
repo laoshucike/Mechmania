@@ -11,106 +11,23 @@ import src.game.game_constants as game_consts
 from src.game.character import *
 from src.game.gamemap import *
 
-targetpriority = ["Sorcerer", "Enchanter", "Wizard", "Assassin", "Druid", "Archer", "Paladin", "Warrior"]
-naima = ["Paladin", "Druid"]
-HP = [0,0,0,0,0,0]
-hurt = [False, False, False, False,False,False]
 # Game map that you can use to query 
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "yongshi"
+teamName = "Test"
 # ---------------------------------------------------------------------
-
-'''
-myself -- character obj
-
-'''
-def druid_function(myself, enemylist, allylist):
-    action = None
-    lowestHP_e = 2000
-    lowestHP_a = 2000
-    enemy = None
-    ally = None
-    for target in enemylist:
-        if target.is_dead() or not myself.in_range_of(target, gameMap):
-            continue
-        if HP[int(target.id) - 1] < lowestHP_e:
-            lowestHP_e = HP[int(target.id) - 1]
-            enemy = target
-    for target in allylist:
-        if target.is_dead() or not myself.in_range_of(target, gameMap):
-            continue
-        if HP[int(target.id) -1 ] < lowestHP_a:
-            lowestHP_a = HP[int(target.id) -1]
-            ally = target
-
-    
-    return action 
-
-def warrier_function(myself, enemylist):
-    action = None
-    lowestHP = 2000
-    enemy = None
-    for target in enemylist:
-        if target.is_dead() or not myself.in_range_of(target, gameMap):
-            continue
-        if HP[int(target.id) - 1] < lowestHP:
-            lowestHP = HP[int(target.id) - 1]
-            enemy = target
-    
-    if enemy != None and myself.in_range_of(enemy, gameMap):
-        if myself.casting is None:
-            cast = False
-            for abilityId, cooldown in myself.abilities.items():
-                if cooldown == 0 and abilityId == 1:
-                    ability = game_consts.abilitiesList[int(abilityId)]
-                    action = {
-                        "Action" : "Cast",
-                        "CharacterId":myself.id,
-                        "TargetId":enemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
-                        "AbilityId":1                            
-                    }
-                    cast = True
-                    break
-                if hurt[int(myself.id -1)] == True and cooldown == 0 and abilityId == 15:
-                    ability = game_consts.abilitiesList[int(abilityId)]
-
-                    action = {
-                               "Action" : "Cast",
-                               "CharacterId":myself.id,
-                               "TargetId":enemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
-                               "AbilityId":15                            
-                           }
-                    cast = True
-                    break
-            if not cast:
-                action = {
-                    "Action": "Attack",
-                    "CharacterId": myself.id,
-                    "TargetId": enemy.id,
-                }
-    elif enemy != None: # Not in range, move towards
-        action = {
-            "Action": "Move",
-            "CharacterId": myself.id,
-            "TargetId": enemy.id,
-        }
-    return action
-
-
-
 
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "W1",
+                {"CharacterName": "1",
                  "ClassId": "Warrior"},
-                {"CharacterName": "W2",
+                {"CharacterName": "2",
                  "ClassId": "Warrior"},
-                {"CharacterName": "W3",
+                {"CharacterName": "3",
                  "ClassId": "Warrior"},
             ]}
 # ---------------------------------------------------------------------
@@ -124,50 +41,28 @@ def processTurn(serverResponse):
     enemyteam = []
     # Find each team and serialize the objects
     for team in serverResponse["Teams"]:
-
-        i = 0
         if team["Id"] == serverResponse["PlayerInfo"]["TeamId"]:
             for characterJson in team["Characters"]:
                 character = Character()
                 character.serialize(characterJson)
                 myteam.append(character)
-                if HP[int(team["Characters"][i]["Id"]) - 1] > int(team["Characters"][i]["Attributes"]["Health"]):
-                    hurt[int(team["Characters"][i]["Id"] - 1)] = True
-                else: 
-                    hurt[int(team["Characters"][i]["Id"] - 1)] = False
-                HP[int(team["Characters"][i]["Id"]) -1] = int(team["Characters"][i]["Attributes"]["Health"])
-
-                i+=1
-
         else:
             for characterJson in team["Characters"]:
                 character = Character()
                 character.serialize(characterJson)
                 enemyteam.append(character)
-                if HP[int(team["Characters"][i]["Id"]) -1] > int(team["Characters"][i]["Attributes"]["Health"]):
-                    hurt[int(team["Characters"][i]["Id"])-1] = True
-                else: 
-                    hurt[int(team["Characters"][i]["Id"])-1] = False
-                HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["Health"])
-
-                i+=1
 # ------------------ You shouldn't change above but you can ---------------
 
     # Choose a target
     target = None
     for character in enemyteam:
-        if not character.is_dead():
+        if not character.is_dead():		
             target = character
             break
-
+    
     # If we found a target
     if target:
-        #print myteam
         for character in myteam:
-            if character.classId == 'Warrior':
-                action = warrier_function(character, enemyteam)
-                if not action == None:
-                    actions.append(action)
             # If I am in range, either move towards target
             if character.in_range_of(target, gameMap):
                 # Am I already trying to cast something?
