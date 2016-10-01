@@ -13,7 +13,9 @@ from src.game.gamemap import *
 
 targetpriority = ["Sorcerer", "Enchanter", "Wizard", "Assassin", "Druid", "Archer", "Paladin", "Warrior"]
 naima = ["Paladin", "Druid"]
+full_HP = [0,0,0,0,0,0]
 HP = [0,0,0,0,0,0]
+speed = [0,0,0,0,0,0]
 hurt = [False, False, False, False,False,False]
 # Game map that you can use to query 
 gameMap = GameMap()
@@ -39,11 +41,104 @@ def druid_function(myself, enemylist, allylist):
             lowestHP_e = HP[int(target.id) - 1]
             enemy = target
     for target in allylist:
-        if target.is_dead() or not myself.in_range_of(target, gameMap):
+        if target.is_dead() and myself.in_range_of(target, gameMap):
             continue
         if HP[int(target.id) -1 ] < lowestHP_a:
             lowestHP_a = HP[int(target.id) -1]
             ally = target
+
+    if ally != None:
+        #HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 250):
+        if HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 250):
+            if myself.casting is None:
+                cast = False
+                for abilityId, cooldown in myself.abilities.items():
+                    if cooldown == 0 and abilityId == 3:
+                        ability = game_consts.abilitiesList[int(abilityId)]
+                        action = {
+                            "Action" : "Cast",
+                            "CharacterId":myself.id,
+                            "TargetId":ally.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
+                            "AbilityId":abilityId                       
+                        }
+                        cast = True
+                        break
+
+                    if cooldown == 0 and abilityId == 4:
+                        ability = game_consts.abilitiesList[int(abilityId)]
+                        action = {
+                                "Action" : "Cast",
+                                "CharacterId":myself.id,
+                                "TargetId": ally.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
+                                "AbilityId":abilityId
+                            }
+                        cast = True
+                        break
+    else:
+        for target in allylist:
+            if target.is_dead():
+                continue
+            if HP[int(target.id) -1 ] < lowestHP_a:
+                lowestHP_a = HP[int(target.id) -1]
+                ally = target
+        if ally != None:
+            if HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 500):
+                action = {
+                    "Action" : "Cast",
+                    "CharacterId":myself.id,
+                    "TargetId":ally.id 
+                }
+            else:
+                if enemy == None:
+                    if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
+                        action = {
+                                "Action" : "Move",
+                                "CharacterId" : myself.id,
+                                "TargerId" : enemy.id
+                                }
+                    else:
+                        # flee ??
+                        pass
+                        
+                else:
+                    moving = False
+                    for movingEnemy in enemylist:
+                        if speed[int(movingEnemy.id) - 1] == 2:
+                            moving = True
+                            if myself.casting is None:
+                                cast = False
+                                for abilityId, cooldown in myself.abilities.items():
+                                    if cooldown == 0 and abilityId == 13:
+                                        ability = game_consts.abilitiesList[int(abilityId)]
+                                        action = {
+                                            "Action" : "Cast",
+                                            "CharacterId":myself.id,
+                                            "TargetId":movingEnemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
+                                            "AbilityId":abilityId                       
+                                        }
+                                        cast = True
+                                        break
+                                if not cast:
+                                    if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
+                                        action = {
+                                                "Action" : "Attack",
+                                                "CharacterId" : myself.id,
+                                                "TargerId" : enemy.id
+                                                }
+                                    else:
+                                        # flee ??
+
+                            break
+
+                    if moving == False:
+                        if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
+                            action = {
+                                    "Action" : "Attack",
+                                    "CharacterId" : myself.id,
+                                    "TargerId" : enemy.id
+                                    }
+                        else:
+                            # flee ??       
 
     
     return action 
@@ -124,7 +219,7 @@ def processTurn(serverResponse):
     enemyteam = []
     # Find each team and serialize the objects
     for team in serverResponse["Teams"]:
-
+        
         i = 0
         if team["Id"] == serverResponse["PlayerInfo"]["TeamId"]:
             for characterJson in team["Characters"]:
@@ -151,6 +246,9 @@ def processTurn(serverResponse):
                 HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["Health"])
 
                 i+=1
+            full_HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MaxHealth"])
+            speed[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MovementSpeed"])
+
 # ------------------ You shouldn't change above but you can ---------------
 
     # Choose a target
