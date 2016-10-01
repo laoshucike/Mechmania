@@ -19,7 +19,7 @@ hurt = [False, False, False, False,False,False]
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "yongshi"
+teamName = "warrior_test"
 # ---------------------------------------------------------------------
 
 '''

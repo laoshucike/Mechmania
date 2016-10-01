@@ -20,7 +20,7 @@ targetpriority = ["Sorcerer", "Enchanter", "Wizard", "Assassin", "Druid", "Arche
 naima = ["Paladin", "Druid"]
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "Mine"
+teamName = "mine"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
