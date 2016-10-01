@@ -134,4 +134,93 @@ function doMatching (rankingObject) {
   }
 }
 
-doMatching()
+function generateAllWithWarriorBase() {
+  Object.keys(newRanking()).filter((combo) => {
+    return combo.indexOf('Warrior') > -1
+  }).forEach(comb => {
+    log(generate_pycode.do('warrior_test_base', comb, 'liu_'))
+  })
+
+  return Object.keys(newRanking()).filter((combo) => {
+    return combo.indexOf('Warrior') > -1
+  }).map(name => 'liu_' + name)
+}
+
+write(newRanking(generateAllWithWarriorBase()))
+/*
+write(newRanking([ 'Warrior_Warrior_Warrior',
+  'Warrior_Archer_Archer',
+  'Warrior_Assassin_Assassin',
+  'Warrior_Druid_Druid',
+  'Warrior_Enchanter_Enchanter',
+  'Warrior_Paladin_Paladin',
+  'Warrior_Sorcerer_Sorcerer',
+  'Warrior_Warrior_Archer',
+  'Warrior_Warrior_Assassin',
+  'Warrior_Warrior_Druid',
+  'Warrior_Warrior_Enchanter',
+  'Warrior_Warrior_Paladin',
+  'Warrior_Warrior_Sorcerer',
+  'Wizard_Warrior_Warrior',
+  'Wizard_Wizard_Warrior',
+  'Warrior_Assassin_Archer',
+  'Warrior_Druid_Archer',
+  'Warrior_Enchanter_Archer',
+  'Warrior_Paladin_Archer',
+  'Warrior_Sorcerer_Archer',
+  'Wizard_Warrior_Archer',
+  'Warrior_Druid_Assassin',
+  'Warrior_Enchanter_Assassin',
+  'Warrior_Paladin_Assassin',
+  'Warrior_Sorcerer_Assassin',
+  'Wizard_Warrior_Assassin',
+  'Warrior_Enchanter_Druid',
+  'Warrior_Paladin_Druid',
+  'Warrior_Sorcerer_Druid',
+  'Wizard_Warrior_Druid',
+  'Warrior_Paladin_Enchanter',
+  'Warrior_Sorcerer_Enchanter',
+  'Wizard_Warrior_Enchanter',
+  'Warrior_Sorcerer_Paladin',
+  'Wizard_Warrior_Paladin',
+  'Wizard_Warrior_Sorcerer','txu', 'default', 'mine', 'reference', 'warrior_test']))*/
+/*
+['Warrior_Warrior_Warrior',
+  'Warrior_Archer_Archer',
+  'Warrior_Assassin_Assassin',
+  'Warrior_Druid_Druid',
+  'Warrior_Enchanter_Enchanter',
+  'Warrior_Paladin_Paladin',
+  'Warrior_Sorcerer_Sorcerer',
+  'Warrior_Warrior_Archer',
+  'Warrior_Warrior_Assassin',
+  'Warrior_Warrior_Druid',
+  'Warrior_Warrior_Enchanter',
+  'Warrior_Warrior_Paladin',
+  'Warrior_Warrior_Sorcerer',
+  'Wizard_Warrior_Warrior',
+  'Wizard_Wizard_Warrior',
+  'Warrior_Assassin_Archer',
+  'Warrior_Druid_Archer',
+  'Warrior_Enchanter_Archer',
+  'Warrior_Paladin_Archer',
+  'Warrior_Sorcerer_Archer',
+  'Wizard_Warrior_Archer',
+  'Warrior_Druid_Assassin',
+  'Warrior_Enchanter_Assassin',
+  'Warrior_Paladin_Assassin',
+  'Warrior_Sorcerer_Assassin',
+  'Wizard_Warrior_Assassin',
+  'Warrior_Enchanter_Druid',
+  'Warrior_Paladin_Druid',
+  'Warrior_Sorcerer_Druid',
+  'Wizard_Warrior_Druid',
+  'Warrior_Paladin_Enchanter',
+  'Warrior_Sorcerer_Enchanter',
+  'Wizard_Warrior_Enchanter',
+  'Warrior_Sorcerer_Paladin',
+  'Wizard_Warrior_Paladin',
+  'Wizard_Warrior_Sorcerer'].forEach(folder => exec('rm -rf ../clients/liu_' + folder))
+*/
+
+// doMatching()
