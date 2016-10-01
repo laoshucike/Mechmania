@@ -44,6 +44,8 @@ exports.do = () => {
 
   Comb.forEach(comb => {
     UniqComb = UniqComb.filter(function (c) {
+      c = c.sort((a,b) => a<b)
+      comb = comb.sort((a,b) => a<b)
       return !(c[0] == comb[0] && c[1] == comb[1] && c[2] == comb[2]);
     })
     UniqComb.push(comb)
