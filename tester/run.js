@@ -35,8 +35,7 @@ var newRanking = (feed) => {
     })
   } else {
     feed.forEach(teamArrange => {
-        //teamArrange : 'Druid_Paladin_Sorcerer'
-
+       ranking[teamArrange] = 1000
     })
   }
 
@@ -67,7 +66,10 @@ function playForXTimes(way1, way2, times) {
   count1 = 0, tie=0, count2 = 0;
   while (i) {
     obj = simulate(way1, way2, true)
-    if (!obj.success) process.exit()
+    if (!obj.success) {
+      log(`not success status with ${way1} ${way2}`)
+      //log(`from stdout${obj.stdout}`)
+    }
     if (obj.tie) tie++;
     if (obj.team1won) count1 ++;
     if (obj.team2won) count2 ++;
@@ -77,6 +79,7 @@ function playForXTimes(way1, way2, times) {
   return {
     first_win : count1 > count2,
     win_ratio : count1 > count2 ? count1 / times : count2 / times,
+    success : obj.success,
   }
 }
 function generateAll() {
@@ -93,31 +96,37 @@ function generateAll() {
  //generateAll()
 //console.log(Date.now() - t)
 
-var latestRanking = read()
-var unwritten = 0;
+
+function doMatching (rankingObject) {
+  var unwritten = 0;
+  var latestRanking = rankingObject || read()
 
 
+  while (true) {
+    var players = _.sample(Object.keys(latestRanking),2 )
+    var res = playForXTimes(players[0], players[1], 3)
+    if (!res.success)
+      continue;
+    var rk = ranking({
+      ranks : players.map(p => latestRanking[p]),
+      scores : [res.first_win ? 1 : 0, res.first_win ? 0 : 1,],
+      growth : [10, 10]
+    });
+    var oldRk = players.map(p => latestRanking[p])
+    latestRanking[players[0]] += rk[0]
+    latestRanking[players[1]] += rk[1]
+    var newRk = players.map(p => latestRanking[p])
 
-while (true) {
-  var players = _.sample(Object.keys(latestRanking),2 )
-  var res = playForXTimes(players[0], players[1], 3)
-  var rk = ranking({
-    ranks : players.map(p => latestRanking[p]),
-    scores : [res.first_win ? 1 : 0, res.first_win ? 0 : 1,],
-    growth : [10, 10]
-  });
-  var oldRk = players.map(p => latestRanking[p])
-  latestRanking[players[0]] += rk[0]
-  latestRanking[players[1]] += rk[1]
-  var newRk = players.map(p => latestRanking[p])
+    log(`${players[0]} : ${oldRk[0]} -> ${newRk[0]}`)
+    log(`${players[1]} : ${oldRk[1]} -> ${newRk[1]}`)
 
-  log(`${players[0]} : ${oldRk[0]} -> ${newRk[0]}`)
-  log(`${players[1]} : ${oldRk[1]} -> ${newRk[1]}`)
-
-  unwritten ++;
-  if (unwritten > 10) {
-    write(latestRanking);
-    log('writting.....');
-    unwritten = 0;
+    unwritten ++;
+    if (unwritten > 6) {
+      write(latestRanking);
+      log('writting.....');
+      unwritten = 0;
+    }
   }
 }
+
+doMatching()
