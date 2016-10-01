@@ -47,7 +47,12 @@ execOut('ls rankings').sort((a,b) => a < b)[0];
 var read = () => {
   //var name = biggsetName()
   //log('reading ' + name)
-  return JSON.parse(execOut('cat rankings/latest.json'))
+  var res = execOut('cat rankings/latest.json');
+  if (res.indexOf('No such file or directory') > -1) {
+    return {}
+  } else {
+    return JSON.parse(execOut('cat rankings/latest.json'))
+  }
 }
 var write = (rk) => {
   //var name = (parseInt(biggsetName().split('.json')[0]) + 1) + '.json'
