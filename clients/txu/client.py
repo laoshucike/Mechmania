@@ -23,11 +23,11 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "AD Archer",
+                {"CharacterName": "AD Archer1",
                  "ClassId": "Archer"},
-                {"CharacterName": "Archer",
+                {"CharacterName": "AD Archer2",
                  "ClassId": "Archer"},
-                {"CharacterName": "Warrior",
+                {"CharacterName": "AD Archer3",
                  "ClassId": "Archer"},
             ]}
 # ---------------------------------------------------------------------
@@ -101,8 +101,15 @@ def processTurn(serverResponse):
                         # Do I have an ability not on cooldown
                         if cooldown == 0:
                             if abilityId == 0:
-			        if len(character.debuffs) == 0:#TODO:needs to be fixed for only three kind of debuffs
-				    continue
+                                use_abili = False;
+                                for debuff in character.debuffs:
+                                    
+                                    if debuff["Attribute"] == "Stunned" or debuff["Attribute"] == "Silenced" or debuff["Attribute"] == "Rooted":
+                                        use_abili = True
+			             #if len(character.debuffs) == 0:#TODO:needs to be fixed for only three kind of debuffs
+				    
+                                if not use_abili:
+                                    continue
                             if abilityId == 12:#skip spint
                                 continue
                             # If I can, then cast it
