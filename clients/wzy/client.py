@@ -282,13 +282,33 @@ def archer_func(myself, enemy, enemys, ally):
                 if averX < myself.position[0]:
                     if myself.position[0] == 3:
                         nextplace_arr[0] += 1
-                        nextplace_arr[1] += 1
+                        if nextplace_arr[1] == 4:
+                            nextplace_arr[1] -= 1 
+                        else:
+                            nextplace_arr[1] += 1
                     elif nextplace_arr[0] == 4:
-                        nextplace_arr[1] = min(nextplace_arr[1] + 2, 4)
+                        if nextplace_arr[1] >= 2:
+                            nextplace_arr[1] -= 2 
+                        else:
+                            nextplace_arr[1] += 2
                     else:
                         nextplace_arr[0] = min(nextplace_arr[0] + 2, 4)
 
                 else:
+                    if myself.position[0] == 1:
+                        nextplace_arr[0] -= 1
+                        if nextplace_arr[1] == 0:
+                            nextplace_arr[1] += 1 
+                        else:
+                            nextplace_arr[1] -= 1
+                    elif nextplace_arr[0] == 0:
+                        if nextplace_arr[1] >= 2:
+                            nextplace_arr[1] -= 2 
+                        else:
+                            nextplace_arr[1] += 2
+                    else:
+                        nextplace_arr[0] = max(nextplace_arr[0] - 2, 0)
+                    '''
                     if nextplace_arr[0] == 1:
                         nextplace_arr[0] -= 1
                         nextplace_arr[1] -= 1
@@ -296,6 +316,7 @@ def archer_func(myself, enemy, enemys, ally):
                         nextplace_arr[1] = max(nextplace_arr[1] - 2, 0)
                     else:
                         nextplace_arr[0] = max(nextplace_arr[0] - 2, 0)
+                    '''
             return {
                 "Action": "Move",
                 "CharacterId": myself.id,
