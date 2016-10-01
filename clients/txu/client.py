@@ -52,6 +52,9 @@ def processTurn(serverResponse):
                 character.serialize(characterJson)
                 enemyteam.append(character)
 # ------------------ You shouldn't change above but you can ---------------
+    #TODO:moving forward only when ditance > 3 or Don't move OR move to (2,0) and wait until engage
+    #TODO:When dealing with 0 attacking range enemy, move(sprint) and hit?
+    #TODO:should I Flee with low blood?
     myLeft = 0
     enenyLeft = 0
     for character in myteam:
@@ -59,61 +62,67 @@ def processTurn(serverResponse):
             myLeft+=1
     # Choose a target
     # With Minimum Health
-    # TODO select in range first ?
+    # TODO select in range first ? (if target in range,that's fine, if not in range, select the one in range)
+    # Done
     target = None
     secondTarget = None
     min_health = 2000 
     for character in enemyteam:
         health = character.attributes.health
-        #print str(health)+str(min_health)
         if not character.is_dead():
             enenyLeft+=1
             if target is None:
                 target = character
                 min_health = health
-                #print str(min_health)+str(health)
+            elif not myteam[0].in_range_of(target, gameMap) and myteam[0].in_range_of(character,gameMap):
+                secondTarget = target
+                target = character
+                min_health = health
             elif health <= min_health:
                 secondTarget = target
-                #print secondTarget
                 target  = character
                 min_health = health
-    enemyRemainHealth = min_health
+
     # If we found a target
     if target:
+        enemyRemainHealth = target.attributes.health
         for character in myteam:
             if character.is_dead():
                 continue
             # If I am in range, either move towards target
             if character.in_range_of(target, gameMap):
                 #if enemy is dead, change target
-                #print enemyRemainHealth
                 if enemyRemainHealth <= 0:
                     target = secondTarget
-                    #print target
                     if target is None:
                         break
                     enemyRemainHealth = target.attributes.health
-                    #print enemyRemainHealth
                 # Am I already trying to cast something?
                 if character.casting is None:
                     cast = False
+                    silenced =  False
                     for abilityId, cooldown in character.abilities.items():
                         # Do I have an ability not on cooldown
                         if cooldown == 0:
                             if abilityId == 0:
                                 use_abili = False;
                                 for debuff in character.debuffs:
-                                    
-                                    if debuff["Attribute"] == "Stunned" or debuff["Attribute"] == "Silenced" or debuff["Attribute"] == "Rooted":
+                                    if debuff["Attribute"] == "Silenced":
+                                        silenced = True
+                                         
+                                    if debuff["Attribute"] == "Stunned": 
+                                    #if debuff["Attribute"] == "Stunned" or debuff["Attribute"] == "Silenced" or debuff["Attribute"] == "Rooted":
                                         use_abili = True
-			             #if len(character.debuffs) == 0:#TODO:needs to be fixed for only three kind of debuffs
-				    
+			             #if len(character.debuffs) == 0:#TODO:needs to be fixed for only three kind of debuffs (When to user burst)
+				if silenced:
+                                    cast = False
+                                    break    
                                 if not use_abili:
                                     continue
-                            if abilityId == 12:#skip spint
+                            if abilityId == 12:#skip sprint now TODO:will sprint be better dealing with 0 range attack
                                 continue
                             # If I can, then cast it
-                            if abilityId == 2: #armor debuff, only cast when my team member are all alive
+                            if abilityId == 2: #armor debuff, only cast when my team member are all alive TODO:is it necessary
                                 if myLeft < 3:
                                     continue
 
