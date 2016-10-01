@@ -17,6 +17,7 @@ positions = [[],[],[],[],[],[]]
 full_HP = [0,0,0,0,0,0]
 HP = [0,0,0,0,0,0]
 speed = [0,0,0,0,0,0]
+turn = 0
 hurt = [False, False, False, False,False,False]
 # Game map that you can use to query 
 gameMap = GameMap()
@@ -54,6 +55,7 @@ def fleeNextStep(myPos,enemyPos):
     return farestPos
     
 def druid_function(myself, enemylist, allylist):
+    global turn 
     action = None
     lowestHP_e = 2000
     lowestHP_a = 2000
@@ -72,13 +74,16 @@ def druid_function(myself, enemylist, allylist):
             lowestHP_a = HP[int(target.id) -1]
             ally = target
 
-    if ally != None:
+    if ally != None and turn < 120:
         #HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 250):
         if HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 250):
+            print "fuuuuuuuuckkkk"
             if myself.casting is None:
+                
                 cast = False
                 for abilityId, cooldown in myself.abilities.items():
                     if cooldown == 0 and abilityId == 3:
+
                         ability = game_consts.abilitiesList[int(abilityId)]
                         return {
                             "Action" : "Cast",
@@ -89,7 +94,7 @@ def druid_function(myself, enemylist, allylist):
                         cast = True
                         break
 
-                    if cooldown == 0 and abilityId == 4:
+                    if cooldown == 0 and abilityId == 4 and  HP[int(enemy.id) - 1] > 0.5*full_HP[int(enemy.id) -1]:
                         ability = game_consts.abilitiesList[int(abilityId)]
                         return {
                                 "Action" : "Cast",
@@ -99,79 +104,110 @@ def druid_function(myself, enemylist, allylist):
                             }
                         cast = True
                         break
+            if enemy == None:
+                if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
+                    return  {
+                            "Action" : "Move",
+                            "CharacterId" : myself.id,
+                            "TargetId" : enemy.id
+                            }
+                else:
+                    return None
+            if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1] or HP[int(enemy.id) - 1] < 0.5*full_HP[int(enemy.id) -1]:
+                return {
+                        "Action" : "Attack",
+                        "CharacterId" : myself.id,
+                        "TargetId" : enemy.id
+                        }
+            else:
+                # flee ??       
+                pos_enemy = positions[int(enemy.id) - 1]
+                nextS = fleeNextStep(myself.position, pos_enemy)
+                return {
+                        "Action" : "Move",
+                        "CharacterId": myself.id,
+                        "Location":tuple(nextS)
+                        }
+
+
+       
     else:
+        lowestHP_a = 2000
+        ally = None
         for target in allylist:
             if target.is_dead():
                 continue
             if HP[int(target.id) -1 ] < lowestHP_a:
                 lowestHP_a = HP[int(target.id) -1]
                 ally = target
-        if ally != None:
-            if HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 500):
-                return {
-                    "Action" : "Cast",
-                    "CharacterId":myself.id,
-                    "TargetId":ally.id 
-                }
+        if ally == None:
+            ally = myself
+        if ally != myself and HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 500):
+            return {
+                "Action" : "Move",
+                "CharacterId":myself.id,
+                "TargetId":ally.id 
+            }
+        else:
+            if enemy == None:
+                if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
+                    return  {
+                            "Action" : "Move",
+                            "CharacterId" : myself.id,
+                            "TargetId" : enemy.id
+                            }
+                else:
+                    return None
+                    
             else:
-                if enemy == None:
+                moving = False
+                for movingEnemy in enemylist:
+                    if speed[int(movingEnemy.id) - 1] > 2:
+                        moving = True
+                        if myself.casting is None:
+                            cast = False
+                            for abilityId, cooldown in myself.abilities.items():
+                                if cooldown == 0 and abilityId == 13:
+                                    ability = game_consts.abilitiesList[int(abilityId)]
+                                    return {
+                                        "Action" : "Cast",
+                                        "CharacterId":myself.id,
+                                        "TargetId":movingEnemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
+                                        "AbilityId":abilityId                       
+                                    }
+                                    cast = True
+                                    break
+                            if not cast:
+                                if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
+                                    return {
+                                            "Action" : "Attack",
+                                            "CharacterId" : myself.id,
+                                            "TargetId" : enemy.id
+                                            }
+                                else:
+                                    pos_enemy = positions[int(movingEnemy.id) - 1]
+                                    nextS = fleeNextStep(myself.position, pos_enemy)
+                                    return {
+                                            "Action" : "Move",
+                                            "CharacterId": myself.id,
+                                            "Location":tuple(nextS)
+                                            }
+                if moving == False:
                     if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
-                        return  {
-                                "Action" : "Move",
+                        return {
+                                "Action" : "Attack",
                                 "CharacterId" : myself.id,
-                                "TargerId" : enemy.id
+                                "TargetId" : enemy.id
                                 }
                     else:
-                        return None
-                        
-                else:
-                    moving = False
-                    for movingEnemy in enemylist:
-                        if speed[int(movingEnemy.id) - 1] == 2:
-                            moving = True
-                            if myself.casting is None:
-                                cast = False
-                                for abilityId, cooldown in myself.abilities.items():
-                                    if cooldown == 0 and abilityId == 13:
-                                        ability = game_consts.abilitiesList[int(abilityId)]
-                                        return {
-                                            "Action" : "Cast",
-                                            "CharacterId":myself.id,
-                                            "TargetId":movingEnemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
-                                            "AbilityId":abilityId                       
-                                        }
-                                        cast = True
-                                        break
-                                if not cast:
-                                    if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
-                                        return {
-                                                "Action" : "Attack",
-                                                "CharacterId" : myself.id,
-                                                "TargerId" : enemy.id
-                                                }
-                                    else:
-                                        pos_enemy = positions[int(movingEnemy.Id) - 1]
-                                        return {
-                                                "Action" : "Move",
-                                                "CharacterId": myself.id,
-                                                "Location":fleeNextStep(myself.position, pos_enemy)
-                                                }
-                            break
-                    if moving == False:
-                        if HP[int(myself.id) - 1] > 0.5*full_HP[int(myself.id) - 1]:
-                            return {
-                                    "Action" : "Attack",
-                                    "CharacterId" : myself.id,
-                                    "TargerId" : enemy.id
-                                    }
-                        else:
-                            # flee ??       
-                            pos_enemy = positions[int(enemy.Id) - 1]
-                            return {
-                                    "Action" : "Move",
-                                    "CharacterId": myself.id,
-                                    "Location":fleeNextStep(myself.position, pos_enemy)
-                                    }
+                        # flee ??       
+                        pos_enemy = positions[int(enemy.id) - 1]
+                        nextS = fleeNextStep(myself.position, pos_enemy)
+                        return {
+                                "Action" : "Move",
+                                "CharacterId": myself.id,
+                                "Location":tuple(nextS)
+                                }
 
     
     return None 
@@ -234,10 +270,10 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "W1",
-                 "ClassId": "Warrior"},
-                {"CharacterName": "W2",
-                 "ClassId": "Warrior"},
+                {"CharacterName": "D1",
+                 "ClassId": "Druid"},
+                {"CharacterName": "D2",
+                 "ClassId": "Druid"},
                 {"CharacterName": "D3",
                  "ClassId": "Druid"},
             ]}
@@ -250,6 +286,9 @@ def processTurn(serverResponse):
     actions = []
     myteam = []
     enemyteam = []
+    global turn 
+    turn  += 1
+    print "T",turn
     # Find each team and serialize the objects
     for team in serverResponse["Teams"]:
         
