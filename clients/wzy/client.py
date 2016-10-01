@@ -20,13 +20,13 @@ targetpriority = ["Sorcerer", "Enchanter", "Wizard", "Assassin", "Druid", "Arche
 naima = ["Paladin", "Druid"]
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "Wzy"
+teamName = "wzy"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
-    return {'TeamName': 'wzy',
+    return {'TeamName': teamName,
             'Characters': [
                 {"CharacterName": "Druid",
                  "ClassId": "Archer"},
@@ -37,7 +37,7 @@ def initialResponse():
             ]}
 # ---------------------------------------------------------------------
 
-def archer_func(myself, enemy, enemys):
+def archer_func(myself, enemy, enemys, ally):
 
     global targetpriority, naima
 
@@ -58,7 +58,6 @@ def archer_func(myself, enemy, enemys):
         target = None
         if myself.in_range_of(enemy, gameMap):
                 target = enemy
-
         if target != None:
             return {
                 "Action": "Attack",
@@ -73,17 +72,21 @@ def archer_func(myself, enemy, enemys):
                 "TargetId": enemy.id,
             }
     
-    else:
-
+    else:                                                               #blood < 0.5
         if myself.attributes.stunned == -1 or myself.attributes.rooted == -1:
             if myself.abilities[0] == 0:       #burst - break crowd control with a long cooldown
-
                 return {
                     "Action": "Cast",
                     "CharacterId": myself.id,
 
                     "TargetId": myself.id,
-                    "AbilityId": 0
+                    "AbilityId": int(0)
+                }
+            else :                          #whatever
+                return {
+                    "Action": "Move",
+                    "CharacterId": myself.id,
+                    "TargetId": ally[0].id,
                 }
         elif myself.abilities[2] == 0:
                 return {
@@ -91,17 +94,30 @@ def archer_func(myself, enemy, enemys):
                     "CharacterId": myself.id,
 
                     "TargetId": myself.id,
-                    "AbilityId": 2
+                    "AbilityId": int(2)
                 }
-        else:       #run!!!!!!!!!!!
+        else:                                #run!!!!!!!!!!!
 
+            if (ally[0].classId in naima):      #run to naima
+                return {
+                    "Action": "Move",
+                    "CharacterId": myself.id,
+                    "TargetId": ally[0].id,
+                }
 
-            nextplace = copy.deepcopy(myself.position)
+            if (ally[1].classId in naima):          #run to naima
+                return {
+                    "Action": "Move",
+                    "CharacterId": myself.id,
+                    "TargetId": ally[0].id,
+                }                
+
+            nextplace = copy.deepcopy(myself.position)  #no naima
 
             nextplace_arr = list(nextplace)
 
             speed = myself.attributes.movementSpeed
-            if speed == 1:
+            if speed == 1:                                      #speed 1
 
                 if averX < nextplace_arr[0] and averY < nextplace_arr[1]:
                     if nextplace_arr[0] == 4 and nextplace_arr[1] == 4:
@@ -119,11 +135,13 @@ def archer_func(myself, enemy, enemys):
                             }
                     elif nextplace_arr[0] == 4:
                         nextplace_arr[1] = nextplace_arr[1] + 1
+
                     else:
                         nextplace_arr[0] = nextplace_arr[0] + 1
                         if ((nextplace_arr[0] == 3 and nextplace_arr[1] == 1) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 3 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 1)):
                             nextplace_arr[0] -= 1
                             nextplace_arr[1] = nextplace_arr[1] + 1
+
 
                 elif averX < nextplace_arr[0] and averY > nextplace_arr[1]:
                     if nextplace_arr[0] == 4 and nextplace_arr[1] == 0:
@@ -191,7 +209,7 @@ def archer_func(myself, enemy, enemys):
                             nextplace_arr[0] += 1
                             nextplace_arr[1] = nextplace_arr[1] - 1
 
-            else:
+            else:                       #speed 2
                 if averX < myself.position[0]:
                     if myself.position[0] == 3:
                         nextplace_arr[0] += 1
@@ -209,14 +227,12 @@ def archer_func(myself, enemy, enemys):
                         nextplace_arr[1] = max(nextplace_arr[1] - 2, 0)
                     else:
                         nextplace_arr[0] = max(nextplace_arr[0] - 2, 0)
-#            print nextplace_arr[0]
-#            print nextplace_arr[1]
-
             return {
                 "Action": "Move",
                 "CharacterId": myself.id,
                 "Location": nextplace_arr
             }
+            print "doomed"
 
 # Determine actions to take on a given turn, given the server response
 def processTurn(serverResponse):
@@ -241,6 +257,13 @@ def processTurn(serverResponse):
 
 
 # ------------------ You shouldn't change above but you can ---------------
+    #if (targetpriority.index(enemyteam[0]) > targetpriority.index(enemyteam[1])):
+    #    enemyteam[1], enemyteam[0] = enemyteam[y], enemyteam[x]
+
+#    print map(lambda en: en.classId, enemyteam)
+    enemyteam = sorted(enemyteam, key=lambda en: targetpriority.index(en.classId))
+#    print map(lambda en: en.classId, enemyteam)
+
     # Choose a target
     target = None
     for character in enemyteam:
@@ -252,7 +275,10 @@ def processTurn(serverResponse):
     if target:
         for character in myteam:
             if (character.classId == "Archer"):
-                actions.append(archer_func(character, target, enemyteam));
+                action = archer_func(character, target, enemyteam, myteam)
+                if action is None:
+                    print "hahh no action returned"
+                actions.append(action)
             else: 
             # If I am in range, either move towards target
                 if character.in_range_of(target, gameMap):
