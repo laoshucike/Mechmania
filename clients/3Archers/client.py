@@ -17,7 +17,8 @@ gameMap = GameMap()
 # --------------------------- SET THIS IS UP -------------------------
 teamName = "Advanced Arc"
 # ---------------------------------------------------------------------
-
+turn = 0
+guard = True
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
@@ -55,6 +56,20 @@ def processTurn(serverResponse):
     #TODO:moving forward only when ditance > 3 or Don't move OR move to (2,0) and wait until engage
     #TODO:When dealing with 0 attacking range enemy, move(sprint) and hit?
     #TODO:should I Flee with low blood?
+    global turn
+    turn +=1
+    global guard
+    if guard == True:
+        for enemy in enemyteam:
+            if myteam[0].in_range_of(enemy,gameMap):
+                guard = False
+    if turn > 20:
+        guard = False
+    if guard == True:
+        return {
+        'TeamName': teamName,
+        'Actions': actions
+        }  
     myLeft = 0
     enenyLeft = 0
     for character in myteam:
