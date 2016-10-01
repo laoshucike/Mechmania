@@ -21,7 +21,7 @@ teamName = "Advanced Arc"
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
-    return {'TeamName': teamName,
+    return {'TeamName': 'txu',
             'Characters': [
                 {"CharacterName": "AD Archer1",
                  "ClassId": "Archer"},

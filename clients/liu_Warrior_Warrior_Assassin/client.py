@@ -10,7 +10,6 @@ sys.path.append("../..")
 import src.game.game_constants as game_consts
 from src.game.character import *
 from src.game.gamemap import *
-
 targetpriority = ["Sorcerer", "Enchanter", "Wizard", "Assassin", "Druid", "Archer", "Paladin", "Warrior"]
 naima = ["Paladin", "Druid"]
 positions = [[],[],[],[],[],[]]
@@ -20,14 +19,11 @@ speed = [0,0,0,0,0,0]
 hurt = [False, False, False, False,False,False]
 # Game map that you can use to query 
 gameMap = GameMap()
-
 # --------------------------- SET THIS IS UP -------------------------
 teamName = "yongshi_deluyi"
 # ---------------------------------------------------------------------
-
 '''
 myself -- character obj
-
 '''
 def isValidPosition(pos):
     for i in pos:
@@ -36,7 +32,6 @@ def isValidPosition(pos):
     if pos == [1,1] or pos == [1,3] or pos == [3,1] or pos == [3,3]:
         return False
     return True
-
 def fleeNextStep(myPos,enemyPos):
     nextList = []
     nextList.append([myPos[0], myPos[1] + 1])
@@ -71,7 +66,6 @@ def druid_function(myself, enemylist, allylist):
         if HP[int(target.id) -1 ] < lowestHP_a:
             lowestHP_a = HP[int(target.id) -1]
             ally = target
-
     if ally != None:
         #HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 250):
         if HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 250):
@@ -88,7 +82,6 @@ def druid_function(myself, enemylist, allylist):
                         }
                         cast = True
                         break
-
                     if cooldown == 0 and abilityId == 4:
                         ability = game_consts.abilitiesList[int(abilityId)]
                         return {
@@ -172,10 +165,8 @@ def druid_function(myself, enemylist, allylist):
                                     "CharacterId": myself.id,
                                     "Location":fleeNextStep(myself.position, pos_enemy)
                                     }
-
     
     return None 
-
 def warrier_function(myself, enemylist):
     action = None
     lowestHP = 2000
@@ -203,7 +194,6 @@ def warrier_function(myself, enemylist):
                     break
                 if hurt[int(myself.id -1)] == True and cooldown == 0 and abilityId == 15:
                     ability = game_consts.abilitiesList[int(abilityId)]
-
                     action = {
                                "Action" : "Cast",
                                "CharacterId":myself.id,
@@ -225,17 +215,12 @@ def warrier_function(myself, enemylist):
             "TargetId": enemy.id,
         }
     return action
-
-
-
-
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
-    return {'TeamName': ####replacename#### ,
-            'Characters': ###JSINJECTA###}
+    return {'TeamName': 'Warrior_Warrior_Assassin' ,
+            'Characters': [{"CharacterName": "Warrior}","ClassId": "Warrior"},{"CharacterName": "Warrior}","ClassId": "Warrior"},{"CharacterName": "Assassin}","ClassId": "Assassin"}]}
 # ---------------------------------------------------------------------
-
 # Determine actions to take on a given turn, given the server response
 def processTurn(serverResponse):
 # --------------------------- CHANGE THIS SECTION -------------------------
@@ -257,13 +242,10 @@ def processTurn(serverResponse):
                 else: 
                     hurt[int(team["Characters"][i]["Id"] - 1)] = False
                 HP[int(team["Characters"][i]["Id"]) -1] = int(team["Characters"][i]["Attributes"]["Health"])
-
                 full_HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MaxHealth"])
                 speed[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MovementSpeed"])
                 positions[int(team["Characters"][i]["Id"]) - 1] = team["Characters"][i]["Position"]
-
                 i+=1
-
         else:
             for characterJson in team["Characters"]:
                 character = Character()
@@ -274,21 +256,17 @@ def processTurn(serverResponse):
                 else: 
                     hurt[int(team["Characters"][i]["Id"])-1] = False
                 HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["Health"])
-
                 full_HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MaxHealth"])
                 speed[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MovementSpeed"])
                 positions[int(team["Characters"][i]["Id"]) - 1] = team["Characters"][i]["Position"]
-
                 i+=1
 # ------------------ You shouldn't change above but you can ---------------
-
     # Choose a target
     target = None
     for character in enemyteam:
         if not character.is_dead():
             target = character
             break
-
     # If we found a target
     if target:
         #print myteam
@@ -304,7 +282,6 @@ def processTurn(serverResponse):
                     actions.append(action)
             
             #print character
-
             #print [x for x in myteam if x!=character]
             # If I am in range, either move towards target
             if character.in_range_of(target, gameMap):
@@ -339,14 +316,12 @@ def processTurn(serverResponse):
                     "CharacterId": character.id,
                     "TargetId": target.id,
                 })
-
     # Send actions to the server
     return {
         'TeamName': teamName,
         'Actions': actions
     }
 # ---------------------------------------------------------------------
-
 # Main method
 # @competitors DO NOT MODIFY
 if __name__ == "__main__":
@@ -354,18 +329,14 @@ if __name__ == "__main__":
     conn = ('localhost', 1337)
     if len(sys.argv) > 2:
         conn = (sys.argv[1], int(sys.argv[2]))
-
     # Handshake
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(conn)
-
     # Initial connection
     s.sendall(json.dumps(initialResponse()) + '\n')
-
     # Initialize test client
     game_running = True
     members = None
-
     # Run game
     try:
         data = s.recv(1024)
@@ -378,11 +349,9 @@ if __name__ == "__main__":
                     data += s.recv(1024)
                 else:
                     value = json.loads(data[0])
-
                     # Check game status
                     if 'winner' in value:
                         game_running = False
-
                     # Send next turn (if appropriate)
                     else:
                         msg = processTurn(value) if "PlayerInfo" in value else initialResponse()
