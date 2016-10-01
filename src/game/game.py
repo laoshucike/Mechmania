@@ -238,7 +238,7 @@ class Game(object):
                 if not character.dead:
                     alive_team = True
             if alive_team:
-                alive_teams.append(team.id)
+                alive_teams.append(team.name)
 
         print("Finished turn " + str(self.turnsExecuted))
 
@@ -265,6 +265,7 @@ class Game(object):
 
         return {
             "PlayerInfo": self.playerInfos[playerId],
+            "TurnNumber": self.turnsExecuted,
             "TurnResult": self.turnResults.get(playerId, [{"Status": "Fail", "Message": "No turn executed."}]),
             "Teams": [team.toJson() for teamId, team in self.teams.items()]
         }
@@ -273,6 +274,7 @@ class Game(object):
     def get_all_info(self):
         return {
             "PlayerInfos": self.playerInfos,
+            "TurnNumber": self.turnsExecuted,
             "TurnResults": [self.turnResults.get(pId, [{"Status": "Fail", "Message": "No turn executed."}]) for pId in self.playerInfos],
             "Teams": [team.toJson() for teamId, team in self.teams.items()]
         }
