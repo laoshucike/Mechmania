@@ -21,7 +21,7 @@ teamName = "Test"
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
-    return {'TeamName': teamName,
+    return {'TeamName': ####replacename####,
             'Characters': ###JSINJECTA###}
 # ---------------------------------------------------------------------
 

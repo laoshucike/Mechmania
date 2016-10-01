@@ -1,4 +1,5 @@
 const replaceTag = '###JSINJECTA###';
+const repalceNameTag = '####replacename####'
 require('shelljs/global');
 const fs = require('fs')
 let execOut = (cmd) => exec(cmd, {async : false, silent : true}).stdout.split('\n').filter(s => s.length > 0)
@@ -11,7 +12,7 @@ exports.do = (base, team) => {
   
   lines = (execOut(`cat ../clients/${team}/client.py`))
   lines = lines.map(line => {
-    return line.replace(replaceTag, Injection)
+    return line.replace(replaceTag, Injection).replace(repalceNameTag, `'${team}'`)
   })
 
   fs.writeFileSync(`../clients/${team}/client.py`, lines.join('\n'))
