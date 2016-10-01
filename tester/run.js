@@ -134,19 +134,20 @@ function doMatching (rankingObject) {
   }
 }
 
-function generateAllWithWarriorBase() {
-  Object.keys(newRanking()).filter((combo) => {
-    return combo.indexOf('Warrior') > -1
-  }).forEach(comb => {
-    log(generate_pycode.do('warrior_test_base', comb, 'liu_'))
+function generateLiu() {
+  var combos = Object.keys(newRanking()).filter((combo) => {
+    return combo.indexOf('Warrior') > -1 || combo.indexOf('Druid') > -1
   })
 
-  return Object.keys(newRanking()).filter((combo) => {
-    return combo.indexOf('Warrior') > -1
-  }).map(name => 'liu_' + name)
+
+  combos.forEach(comb => {
+    log(generate_pycode.do('warrior_druid_test_base', comb, 'liu_'))
+  })
+
+  return combos.map(name => 'liu_' + name)
 }
 
-write(newRanking(generateAllWithWarriorBase()))
+write(newRanking(generateLiu()))
 /*
 write(newRanking([ 'Warrior_Warrior_Warrior',
   'Warrior_Archer_Archer',
