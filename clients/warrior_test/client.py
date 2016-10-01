@@ -26,20 +26,40 @@ teamName = "yongshi"
 myself -- character obj
 
 '''
+def druid_function(myself, enemylist, allylist):
+    action = None
+    lowestHP_e = 2000
+    lowestHP_a = 2000
+    enemy = None
+    ally = None
+    for target in enemylist:
+        if target.is_dead() or not myself.in_range_of(target, gameMap):
+            continue
+        if HP[int(target.id) - 1] < lowestHP_e:
+            lowestHP_e = HP[int(target.id) - 1]
+            enemy = target
+    for target in allylist:
+        if target.is_dead() or not myself.in_range_of(target, gameMap):
+            continue
+        if HP[int(target.id) -1 ] < lowestHP_a:
+            lowestHP_a = HP[int(target.id) -1]
+            ally = target
 
+    
+    return action 
 
 def warrier_function(myself, enemylist):
     action = None
     lowestHP = 2000
     enemy = None
     for target in enemylist:
-        if target.is_dead():
+        if target.is_dead() or not myself.in_range_of(target, gameMap):
             continue
         if HP[int(target.id) - 1] < lowestHP:
             lowestHP = HP[int(target.id) - 1]
             enemy = target
     
-    if myself.in_range_of(enemy, gameMap):
+    if enemy != None and myself.in_range_of(enemy, gameMap):
         if myself.casting is None:
             cast = False
             for abilityId, cooldown in myself.abilities.items():
@@ -70,7 +90,7 @@ def warrier_function(myself, enemylist):
                     "CharacterId": myself.id,
                     "TargetId": enemy.id,
                 }
-    else: # Not in range, move towards
+    elif enemy != None: # Not in range, move towards
         action = {
             "Action": "Move",
             "CharacterId": myself.id,
