@@ -11,23 +11,79 @@ import src.game.game_constants as game_consts
 from src.game.character import *
 from src.game.gamemap import *
 
+targetpriority = ["Sorcerer", "Enchanter", "Wizard", "Assassin", "Druid", "Archer", "Paladin", "Warrior"]
+naima = ["Paladin", "Druid"]
+HP = [0,0,0,0,0,0]
+hurt = [False, False, False, False,False,False]
 # Game map that you can use to query 
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "Test"
+teamName = "yongshi"
 # ---------------------------------------------------------------------
+
+'''
+myself -- character obj
+
+'''
+
+def warrier_function(myself, enemylist):
+    action = None
+    for enemy in enemylist:
+        if enemy.is_dead():
+            continue
+        if myself.in_range_of(enemy, gameMap):
+            if myself.casting is None:
+                cast = False
+                for abilityId, cooldown in myself.abilities.items():
+                    if cooldown == 0 and abilityId == 1:
+                        ability = game_consts.abilitiesList[int(abilityId)]
+                        action = {
+                            "Action" : "Cast",
+                            "CharacterId":myself.id,
+                            "TargetId":enemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
+                            "AbilityId":1                            
+                        }
+                        cast = True
+                        break
+                    if hurt[int(myself.id -1)] == True and cooldown == 0 and abilityId == 15:
+                        ability = game_consts.abilitiesList[int(abilityId)]
+
+                        action = {
+                                   "Action" : "Cast",
+                                   "CharacterId":myself.id,
+                                   "TargetId":enemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
+                                   "AbilityId":15                            
+                               }
+                        cast = True
+                        break
+                if not cast:
+                    action = {
+                        "Action": "Attack",
+                        "CharacterId": myself.id,
+                        "TargetId": enemy.id,
+                    }
+        else: # Not in range, move towards
+            action = {
+                "Action": "Move",
+                "CharacterId": myself.id,
+                "TargetId": enemy.id,
+            }
+    return action
+
+
+
 
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "Druid",
-                 "ClassId": "Druid"},
-                {"CharacterName": "Archer",
-                 "ClassId": "Archer"},
-                {"CharacterName": "Warrior",
+                {"CharacterName": "W1",
+                 "ClassId": "Warrior"},
+                {"CharacterName": "W2",
+                 "ClassId": "Warrior"},
+                {"CharacterName": "W3",
                  "ClassId": "Warrior"},
             ]}
 # ---------------------------------------------------------------------
@@ -41,16 +97,33 @@ def processTurn(serverResponse):
     enemyteam = []
     # Find each team and serialize the objects
     for team in serverResponse["Teams"]:
+
+        i = 0
         if team["Id"] == serverResponse["PlayerInfo"]["TeamId"]:
             for characterJson in team["Characters"]:
                 character = Character()
                 character.serialize(characterJson)
                 myteam.append(character)
+                if HP[int(team["Characters"][i]["Id"]) - 1] > int(team["Characters"][i]["Attributes"]["Health"]):
+                    hurt[int(team["Characters"][i]["Id"] - 1)] = True
+                else: 
+                    hurt[int(team["Characters"][i]["Id"] - 1)] = False
+                HP[int(team["Characters"][i]["Id"]) -1] = int(team["Characters"][i]["Attributes"]["Health"])
+
+                i+=1
+
         else:
             for characterJson in team["Characters"]:
                 character = Character()
                 character.serialize(characterJson)
                 enemyteam.append(character)
+                if HP[int(team["Characters"][i]["Id"]) -1] > int(team["Characters"][i]["Attributes"]["Health"]):
+                    hurt[int(team["Characters"][i]["Id"])-1] = True
+                else: 
+                    hurt[int(team["Characters"][i]["Id"])-1] = False
+                HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["Health"])
+
+                i+=1
 # ------------------ You shouldn't change above but you can ---------------
 
     # Choose a target
@@ -62,7 +135,12 @@ def processTurn(serverResponse):
 
     # If we found a target
     if target:
+        #print myteam
         for character in myteam:
+            if character.classId == 'Warrior':
+                action = warrier_function(character, enemyteam)
+                if not action == None:
+                    actions.append(action)
             # If I am in range, either move towards target
             if character.in_range_of(target, gameMap):
                 # Am I already trying to cast something?
