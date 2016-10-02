@@ -7,13 +7,13 @@ let execOut = (cmd) => exec(cmd, {async : false, silent : true}).stdout.split('\
 
 exports.do = (base, team, prefix) => {
   if (!prefix) prefix = '';
-  var Injection = '[' + team.split('_').map(name => `{"CharacterName": "${name}}","ClassId": "${name}"}`) + ']'
+  var Injection = '[' + team.split('_').map(name => `{"CharacterName": "${name}","ClassId": "${name}"}`) + ']'
   exec(`rm -rf ../clients/${prefix + team}`)
   exec(`cp -av ../clients/${base} ../clients/${prefix + team}`, {silent : true})
   
   lines = (execOut(`cat ../clients/${prefix + team}/client.py`))
   lines = lines.map(line => {
-    return line.replace(replaceTag, Injection).replace(repalceNameTag, `'${team}'`)
+    return line.replace(replaceTag, Injection).replace(repalceNameTag, `'${prefix + team}'`)
   })
 
   fs.writeFileSync(`../clients/${prefix + team}/client.py`, lines.join('\n'))
