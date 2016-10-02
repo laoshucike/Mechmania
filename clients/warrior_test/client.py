@@ -199,7 +199,7 @@ def warrier_function(myself, enemylist):
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
-    return {'TeamName': 'warrior_test',
+    return {'TeamName': teamName,
             'Characters': [
                 {"CharacterName": "W1",
                  "ClassId": "Warrior"},
