@@ -10,7 +10,6 @@ sys.path.append("../..")
 import src.game.game_constants as game_consts
 from src.game.character import *
 from src.game.gamemap import *
-
 targetpriority = ["Sorcerer", "Enchanter", "Wizard", "Assassin", "Druid", "Archer", "Paladin", "Warrior"]
 naima = ["Paladin", "Druid"]
 positions = [[],[],[],[],[],[]]
@@ -23,14 +22,11 @@ stunned = [False, False, False, False, False, False]
 stun_flag = False
 # Game map that you can use to query
 gameMap = GameMap()
-
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "3Warriors"
+teamName = "mix"
 # ---------------------------------------------------------------------
-
 '''
 myself -- character obj
-
 '''
 def isValidPosition(pos):
     for i in pos:
@@ -39,7 +35,6 @@ def isValidPosition(pos):
     if pos == [1,1] or pos == [1,3] or pos == [3,1] or pos == [3,3]:
         return False
     return True
-
 def fleeNextStep(myPos,enemyPos):
     nextList = []
     nextList.append([myPos[0], myPos[1] + 1])
@@ -64,7 +59,6 @@ def assassin_function(myself, enemylist, allylist):
             if HP[int(target.id) - 1] < lowestHP:
                 lowestHP = HP[int(target.id) -1]
                 enemy = target
-
     if target != None:
         if myself.casting is None:
             cast = False
@@ -79,21 +73,13 @@ def assassin_function(myself, enemylist, allylist):
                         "TargetId":enemy.id if ability["StatChanges"][0]["Change"] < 0 else myself.id,
                         "AbilityId":abilityId
                     }
-
-
-
     return None
 '''
-
 def archer_func(myself, enemy, enemys, ally):
-
     global targetpriority, naima
-
-
 #    outofsight = True;
     if enemy.in_range_of(myself, gameMap):
         outofsight = False
-
     sumX = 0
     sumY = 0
     for oneenemy in enemys:
@@ -101,7 +87,6 @@ def archer_func(myself, enemy, enemys, ally):
         sumY += enemy.position[1]
     averX = (int)(sumX/3)
     averY = (int)(sumY/3)
-
     if myself.attributes.health > myself.attributes.maxHealth * 0.5:  # higher than 0.5 * maxhealth , fight!!!!!
         target = None
         if myself.in_range_of(enemy, gameMap):  #fight or cast
@@ -124,28 +109,24 @@ def archer_func(myself, enemy, enemys, ally):
                         }
                         cast = True
                         break
-
                 if not cast:                  # Was I able to cast something? Either wise attack
                     return {
                         "Action": "Attack",
                         "CharacterId": myself.id,
                         "TargetId": target.id,
                     }
-
         else:       #move to enemy
             return{
                 "Action": "Move",
                 "CharacterId": myself.id,
                 "TargetId": enemy.id,
             }
-
     else:                                                               #blood < 0.5
         if myself.attributes.stunned == -1 or myself.attributes.rooted == -1:
             if myself.abilities[0] == 0:       #burst - break crowd control with a long cooldown
                 return {
                     "Action": "Cast",
                     "CharacterId": myself.id,
-
                     "TargetId": myself.id,
                     "AbilityId": int(0)
                 }
@@ -159,7 +140,6 @@ def archer_func(myself, enemy, enemys, ally):
                 return {
                     "Action": "Cast",
                     "CharacterId": myself.id,
-
                     "TargetId": myself.id,
                     "AbilityId": int(12)
                 }
@@ -225,15 +205,11 @@ def archer_func(myself, enemy, enemys, ally):
                         "CharacterId": myself.id,
                         "TargetId": ally[2].id,
                     }
-
             '''
             nextplace = copy.deepcopy(myself.position)  #no naima
-
             nextplace_arr = list(nextplace)
-
             speed = myself.attributes.movementSpeed
             if speed == 1:                                      #speed 1
-
                 if averX < nextplace_arr[0] and averY < nextplace_arr[1]:
                     if nextplace_arr[0] == 4 and nextplace_arr[1] == 4:
                         if myself.in_range_of(enemy, gameMap):
@@ -250,14 +226,11 @@ def archer_func(myself, enemy, enemys, ally):
                             }
                     elif nextplace_arr[0] == 4:
                         nextplace_arr[1] = nextplace_arr[1] + 1
-
                     else:
                         nextplace_arr[0] = nextplace_arr[0] + 1
                         if ((nextplace_arr[0] == 3 and nextplace_arr[1] == 1) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 3 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 1)):
                             nextplace_arr[0] -= 1
                             nextplace_arr[1] = nextplace_arr[1] + 1
-
-
                 elif averX < nextplace_arr[0] and averY > nextplace_arr[1]:
                     if nextplace_arr[0] == 4 and nextplace_arr[1] == 0:
                         if myself.in_range_of(enemy, gameMap):
@@ -279,7 +252,6 @@ def archer_func(myself, enemy, enemys, ally):
                         if ((nextplace_arr[0] == 3 and nextplace_arr[1] == 1) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 3 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 1)):
                             nextplace_arr[0] -= 1
                             nextplace_arr[1] = nextplace_arr[1] - 1
-
                 elif averX > nextplace_arr[0] and averY < nextplace_arr[1]:
                     if nextplace_arr[0] == 0 and nextplace_arr[1] == 4:
                         if myself.in_range_of(enemy, gameMap):
@@ -301,7 +273,6 @@ def archer_func(myself, enemy, enemys, ally):
                         if ((nextplace_arr[0] == 3 and nextplace_arr[1] == 1) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 3 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 1)):
                             nextplace_arr[0] += 1
                             nextplace_arr[1] = nextplace_arr[1] + 1
-
                 else:
                     if nextplace_arr[0] == 0 and nextplace_arr[1] == 0:
                         if myself.in_range_of(enemy, gameMap):
@@ -323,7 +294,6 @@ def archer_func(myself, enemy, enemys, ally):
                         if ((nextplace_arr[0] == 3 and nextplace_arr[1] == 1) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 3 and nextplace_arr[1] == 3) or (nextplace_arr[0] == 1 and nextplace_arr[1] == 1)):
                             nextplace_arr[0] += 1
                             nextplace_arr[1] = nextplace_arr[1] - 1
-
             else:                       #speed 2
                 if averX < myself.position[0]:
                     if myself.position[0] == 3:
@@ -339,7 +309,6 @@ def archer_func(myself, enemy, enemys, ally):
                             nextplace_arr[1] += 2
                     else:
                         nextplace_arr[0] = min(nextplace_arr[0] + 2, 4)
-
                 else:
                     if myself.position[0] == 1:
                         nextplace_arr[0] -= 1
@@ -368,9 +337,6 @@ def archer_func(myself, enemy, enemys, ally):
                 "CharacterId": myself.id,
                 "Location": nextplace_arr
             }
-
-
-
 def druid_function(myself, enemylist, allylist):
     global turn
     action = None
@@ -390,18 +356,15 @@ def druid_function(myself, enemylist, allylist):
         if HP[int(target.id) -1 ] < lowestHP_a:
             lowestHP_a = HP[int(target.id) -1]
             ally = target
-
     if ally != None and turn < 120:
         #HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 250):
         print "ally"
         if HP[int(ally.id) - 1] < (full_HP[int(ally.id) - 1] - 250):
             print "fuuuuuuuuckkkk"
             if myself.casting is None:
-
                 cast = False
                 for abilityId, cooldown in myself.abilities.items():
                     if cooldown == 0 and abilityId == 3:
-
                         ability = game_consts.abilitiesList[int(abilityId)]
                         return {
                             "Action" : "Cast",
@@ -411,7 +374,6 @@ def druid_function(myself, enemylist, allylist):
                         }
                         cast = True
                         break
-
                     if cooldown == 0 and abilityId == 4 and  HP[int(enemy.id) - 1] > 0.5*full_HP[int(enemy.id) -1]:
                         ability = game_consts.abilitiesList[int(abilityId)]
                         return {
@@ -422,7 +384,6 @@ def druid_function(myself, enemylist, allylist):
                             }
                         cast = True
                         break
-
             if enemy == None:
                 for target in enemylist:
                     if target.is_dead():
@@ -488,9 +449,6 @@ def druid_function(myself, enemylist, allylist):
                         "CharacterId": myself.id,
                         "Location":tuple(nextS)
                         }
-
-
-
     else:
         print "else"
         lowestHP_a = 2000
@@ -519,7 +477,6 @@ def druid_function(myself, enemylist, allylist):
                             }
                 else:
                     return None
-
             else:
                 moving = False
                 for movingEnemy in enemylist:
@@ -571,10 +528,7 @@ def druid_function(myself, enemylist, allylist):
                                 "CharacterId": myself.id,
                                 "Location":tuple(nextS)
                                 }
-
-
     return None
-
 def warrier_function(myself, enemylist):
     action = None
     lowestHP = 2000
@@ -586,7 +540,6 @@ def warrier_function(myself, enemylist):
         if HP[int(target.id) - 1] < lowestHP:
             lowestHP = HP[int(target.id) - 1]
             enemy = target
-
     if enemy != None and myself.in_range_of(enemy, gameMap):
         if myself.casting is None:
             cast = False
@@ -605,7 +558,6 @@ def warrier_function(myself, enemylist):
                     break
                 if hurt[int(myself.id -1)] == True and cooldown == 0 and abilityId == 15:
                     ability = game_consts.abilitiesList[int(abilityId)]
-
                     action = {
                                "Action" : "Cast",
                                "CharacterId":myself.id,
@@ -627,24 +579,12 @@ def warrier_function(myself, enemylist):
             "TargetId": enemy.id,
         }
     return action
-
-
-
-
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
-    return {'TeamName': teamName,
-            'Characters': [
-                {"CharacterName": "A1",
-                 "ClassId": "Archer"},
-                {"CharacterName": "A2",
-                 "ClassId": "Archer"},
-                {"CharacterName": "D1",
-                 "ClassId": "Druid"},
-            ]}
+    return {'TeamName':'liu_Druid_Archer_Archer' ,
+            'Characters': [{"CharacterName": "Druid","ClassId": "Druid"},{"CharacterName": "Archer","ClassId": "Archer"},{"CharacterName": "Archer","ClassId": "Archer"}] }
 # ---------------------------------------------------------------------
-
 # Determine actions to take on a given turn, given the server response
 def processTurn(serverResponse):
 # --------------------------- CHANGE THIS SECTION -------------------------
@@ -659,7 +599,6 @@ def processTurn(serverResponse):
     print "T",turn
     # Find each team and serialize the objects
     for team in serverResponse["Teams"]:
-
         i = 0
         if team["Id"] == serverResponse["PlayerInfo"]["TeamId"]:
             for characterJson in team["Characters"]:
@@ -671,14 +610,11 @@ def processTurn(serverResponse):
                 else:
                     hurt[int(team["Characters"][i]["Id"] - 1)] = False
                 HP[int(team["Characters"][i]["Id"]) -1] = int(team["Characters"][i]["Attributes"]["Health"])
-
                 full_HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MaxHealth"])
                 speed[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MovementSpeed"])
                 positions[int(team["Characters"][i]["Id"]) - 1] = team["Characters"][i]["Position"]
                 stunned[int(team["Characters"][i]["Id"]) - 1] = (int(team["Characters"][i]["Attributes"]["Stunned"]) == -1)
-
                 i+=1
-
         else:
             for characterJson in team["Characters"]:
                 character = Character()
@@ -689,21 +625,17 @@ def processTurn(serverResponse):
                 else:
                     hurt[int(team["Characters"][i]["Id"])-1] = False
                 HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["Health"])
-
                 full_HP[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MaxHealth"])
                 speed[int(team["Characters"][i]["Id"]) - 1] = int(team["Characters"][i]["Attributes"]["MovementSpeed"])
                 positions[int(team["Characters"][i]["Id"]) - 1] = team["Characters"][i]["Position"]
-
                 i+=1
 # ------------------ You shouldn't change above but you can ---------------
-
     # Choose a target
     target = None
     for character in enemyteam:
         if not character.is_dead():
             target = character
             break
-
     # If we found a target
     if target:
         #print myteam
@@ -712,7 +644,6 @@ def processTurn(serverResponse):
                 action = warrier_function(character, enemyteam)
                 if not action == None:
                     actions.append(action)
-
             if character.classId == 'Druid':
                 action = druid_function(character, enemyteam, [x for x in myteam if x != character])
                 if not action == None:
@@ -723,7 +654,6 @@ def processTurn(serverResponse):
                     print "hahh no action returned"
                 actions.append(action)
             #print character
-
             #print [x for x in myteam if x!=character]
             # If I am in range, either move towards target
             if character.in_range_of(target, gameMap):
@@ -758,14 +688,12 @@ def processTurn(serverResponse):
                     "CharacterId": character.id,
                     "TargetId": target.id,
                 })
-
     # Send actions to the server
     return {
         'TeamName': teamName,
         'Actions': actions
     }
 # ---------------------------------------------------------------------
-
 # Main method
 # @competitors DO NOT MODIFY
 if __name__ == "__main__":
@@ -773,18 +701,14 @@ if __name__ == "__main__":
     conn = ('localhost', 1337)
     if len(sys.argv) > 2:
         conn = (sys.argv[1], int(sys.argv[2]))
-
     # Handshake
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(conn)
-
     # Initial connection
     s.sendall(json.dumps(initialResponse()) + '\n')
-
     # Initialize test client
     game_running = True
     members = None
-
     # Run game
     try:
         data = s.recv(1024)
@@ -797,11 +721,9 @@ if __name__ == "__main__":
                     data += s.recv(1024)
                 else:
                     value = json.loads(data[0])
-
                     # Check game status
                     if 'winner' in value:
                         game_running = False
-
                     # Send next turn (if appropriate)
                     else:
                         msg = processTurn(value) if "PlayerInfo" in value else initialResponse()

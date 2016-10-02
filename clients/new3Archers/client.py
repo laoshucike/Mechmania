@@ -23,7 +23,7 @@ topLeft = 1
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
-    return {'TeamName': teamName,
+    return {'TeamName': "new3Archers",
             'Characters': [
                 {"CharacterName": "AD Archer1",
                  "ClassId": "Archer"},

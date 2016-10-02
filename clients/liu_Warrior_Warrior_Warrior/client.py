@@ -582,8 +582,13 @@ def warrier_function(myself, enemylist):
 # Set initial connection data
 def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
-    return {'TeamName':'liu_Wizard_Warrior_Archer' ,
-            'Characters': [{"CharacterName": "Wizard","ClassId": "Wizard"},{"CharacterName": "Warrior","ClassId": "Warrior"},{"CharacterName": "Archer","ClassId": "Archer"}] }
+    return {'TeamName':'Warrior_Warrior_Warrior' ,
+            'Characters': [{"CharacterName": "Warrior}",
+            "ClassId": "Warrior"},
+
+            {"CharacterName": "Druid}","ClassId": "Warrior"},
+
+            {"CharacterName": "Druid}","ClassId": "Warrior"}] }
 # ---------------------------------------------------------------------
 # Determine actions to take on a given turn, given the server response
 def processTurn(serverResponse):
