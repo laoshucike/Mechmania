@@ -136,18 +136,35 @@ function doMatching (rankingObject) {
 
 function generateLiu() {
   var combos = Object.keys(newRanking()).filter((combo) => {
-    return combo.indexOf('Warrior') > -1 || combo.indexOf('Druid') > -1
+    //assasin, archer, druid, warrior
+    return ['Assasin', 'Archer', 'Druid', 'Warrior'].filter(man => combo.indexOf(man) > -1).length >= 2
   })
 
 
   combos.forEach(comb => {
-    log(generate_pycode.do('warrior_druid_test_base', comb, 'liu_'))
+    log(generate_pycode.do('mix_base', comb, 'liu_'))
   })
 
   return combos.map(name => 'liu_' + name)
 }
 
-write(newRanking(generateLiu()))
+
+
+const strategy = ['txu', '3Ass', '3Archers', 'wzy', 'mix', 'new3Archers', 'liu_Warrior_Druid_Assassin', 'liu_Warrior_Sorcerer_Archer', 'liu_Warrior_Archer_Archer', 'liu_Warrior_Paladin_Archer', 'liu_Warrior_Warrior_Warrior']
+
+
+
+
+
+//write(newRanking((strategy)))
+
+//write(newRanking(strategy.concat(generateLiu())))
+
+doMatching()
+
+
+//playForXTimes('wzy', '3Archers', 1)
+//console.log(playForXTimes('liu_Druid_Archer_Archer', 'txu', 3))
 /*
 write(newRanking([ 'Warrior_Warrior_Warrior',
   'Warrior_Archer_Archer',
