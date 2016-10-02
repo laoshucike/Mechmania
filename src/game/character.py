@@ -206,6 +206,16 @@ class Character(object):
                                 gameConstants.abilitiesList[ability_id]["Range"]):
             raise OutOfRangeException
 
+        if not target:
+            raise InvalidTargetException
+
+        ability = gameConstants.abilitiesList[ability_id]
+
+        # Iterate through stat changes
+        for stat_change in ability['StatChanges']:
+            if stat_change['Target'] == 0 and not (target is self):
+                raise InvalidTargetException
+
         # Reset casting
         self.casting = None
 
@@ -224,6 +234,9 @@ class Character(object):
         :param character: Character object to cast on, if needed
         :return: None or string error
         """
+        # Remove current casting
+        self.casting = None
+
         if not target:
             raise InvalidTargetException
 
@@ -232,9 +245,6 @@ class Character(object):
 
         # Check if we are in range
         self.in_range_of(target, map, True)
-
-        # Remove current casting
-        self.casting = None
 
         # Get ability json
         ability = copy.deepcopy(gameConstants.abilitiesList[ability_id])
@@ -253,6 +263,8 @@ class Character(object):
                 self.add_stat_change(stat_change)
             elif stat_change['Target'] == 1:
                 target.add_stat_change(stat_change)
+            else:
+                raise InvalidTargetException
 
     def add_stat_change(self, stat_change):
         self.pending_stat_changes.append(stat_change)
@@ -375,14 +387,20 @@ class Character(object):
 
     def serialize(self, json):
         try:
-            self.id = json['Id']
-            self.name = json['Name']
-            self.position = json['Position']
-            self.classId = json['ClassId']
-            self.abilities = json['Abilities']
+            self.id = int(json['Id'])
+            self.name = str(json['Name'])
+            self.position = tuple(json['Position'])
+            self.classId = str(json['ClassId'])
+            self.abilities = {}
+            for abilityId, cooldown in json['Abilities'].items():
+                self.abilities[int(abilityId)] = int(cooldown)
             self.buffs = json['Buffs']
             self.debuffs = json['Debuffs']
-            self.casting = json['Casting']
+            self.casting = None
+            if json['Casting'] is not None:
+                self.casting = {}
+                for name, value in json['Casting'].items():
+                    self.casting[str(name)] = int(value)
             self.attributes = Attributes()
             if not self.attributes.serialize(json['Attributes']):
                 return False
@@ -497,16 +515,16 @@ class Attributes(object):
 
     def serialize(self, json):
         try:
-            self.maxHealth = json['MaxHealth']
-            self.health = json['Health']
-            self.damage = json['Damage']
-            self.spellPower = json['SpellPower']
-            self.attackRange = json['AttackRange']
-            self.armor = json['Armor']
-            self.movementSpeed = json['MovementSpeed']
-            self.silenced = json['Silenced']
-            self.stunned = json['Stunned']
-            self.rooted = json['Rooted']
+            self.maxHealth = int(json['MaxHealth'])
+            self.health = int(json['Health'])
+            self.damage = int(json['Damage'])
+            self.spellPower = int(json['SpellPower'])
+            self.attackRange = int(json['AttackRange'])
+            self.armor = int(json['Armor'])
+            self.movementSpeed = int(json['MovementSpeed'])
+            self.silenced = int(json['Silenced'])
+            self.stunned = int(json['Stunned'])
+            self.rooted = int(json['Rooted'])
         except KeyError as ex:
             print("Failed to serialize: " + str(ex))
             return False
